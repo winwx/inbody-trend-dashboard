@@ -362,12 +362,7 @@
 
     var bodyHtml;
     if (allRecords.length === 0) {
-      bodyHtml =
-        '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:64px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">' +
-        '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:var(--gray-400);"><path d="M12 15V4m0 0L8 8m4-4l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
-        '<div style="font-size:16px; font-weight:700; color:var(--gray-900);">아직 업로드된 데이터가 없어요</div>' +
-        '<div style="font-size:14px; color:var(--gray-600); max-width:360px; line-height:1.6;">인바디에서 내보낸 CSV 파일을 위 업로드 영역으로 올리면 여기서 바로 추세를 확인할 수 있어요.</div>' +
-        '</div>';
+      bodyHtml = "";
     } else {
       bodyHtml =
         '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">' +
