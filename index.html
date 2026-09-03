@@ -7,25 +7,15 @@
 <meta name="description" content="인바디 CSV를 업로드하고 체성분 변화 추이를 확인하는 개인용 도구">
 <style>
   :root {
-    color-scheme: light dark;
-    --bg: #F7F8F6;
-    --ink: #14171A;
-    --muted: #5B6560;
-    --accent: #0E7C66;
-    --accent-soft: rgba(14, 124, 102, 0.12);
-    --line: #DDE3DF;
+    --bg: #FFFFFF;
+    --ink: #191F28;
+    --muted: #6B7583;
+    --accent: #FF6000;
+    --accent-hover: #CC4D00;
+    --accent-soft: #FFEFE5;
+    --line: #E5E7EA;
+    --line-strong: #D1D6DC;
     --font-main: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", "Roboto Mono", Consolas, monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #12151A;
-      --ink: #EDEFEC;
-      --muted: #9AA6A0;
-      --accent: #37C2A0;
-      --accent-soft: rgba(55, 194, 160, 0.14);
-      --line: #262B30;
-    }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -53,9 +43,7 @@
   }
   .btn:active { transform: scale(0.98); }
   .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: color-mix(in srgb, var(--accent) 85%, black); }
-  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
-  .btn-ghost:hover { border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-hover); }
 
   .hero {
     display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center;
