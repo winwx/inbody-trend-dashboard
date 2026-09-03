@@ -206,6 +206,7 @@
     if (!chart.hasEnough) return;
     var canvas = document.getElementById("trendChart");
     if (!canvas || typeof Chart === "undefined") return;
+    var allowPanZoom = chart.labels.length > 10;
 
     var scalesConfig = {
       x: {
@@ -254,8 +255,8 @@
             }
           },
           zoom: {
-            pan: { enabled: true, mode: "x" },
-            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" }
+            pan: { enabled: allowPanZoom, mode: "x" },
+            zoom: { wheel: { enabled: allowPanZoom }, pinch: { enabled: allowPanZoom }, mode: "x" }
           }
         }
       }
@@ -342,12 +343,13 @@
           '<span style="color:var(--gray-500);">' + item.latestText + '</span></div>';
       }).join("");
 
+      var manyPoints = chart.labels.length > 10;
       chartHtml =
         '<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">' +
         '<div style="display:flex; flex-wrap:wrap; gap:16px;">' + legendHtml + '</div>' +
-        '<button data-action="resetzoom" style="background:var(--white); color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600;">줌 초기화</button>' +
+        (manyPoints ? '<button data-action="resetzoom" style="background:var(--white); color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600;">줌 초기화</button>' : '') +
         '</div>' +
-        '<div style="font-size:11px; color:var(--gray-400);">손가락으로 오므리거나 펼쳐서 확대·축소, 드래그로 이동할 수 있어요</div>' +
+        (manyPoints ? '<div style="font-size:11px; color:var(--gray-400);">손가락으로 오므리거나 펼쳐서 확대·축소, 드래그로 이동할 수 있어요</div>' : '') +
         '<div style="position:relative; width:100%; height:320px;"><canvas id="trendChart"></canvas></div>';
     } else if (chart.notEnough) {
       chartHtml = '<div style="height:120px; display:flex; align-items:center; justify-content:center; color:var(--gray-500); font-size:13px; background:var(--bg-normal); border-radius:12px;">추세를 보려면 측정 기록이 2건 이상 필요해요</div>';
