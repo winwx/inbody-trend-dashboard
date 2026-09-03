@@ -39,24 +39,17 @@
   }
 
   .phone-col { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
-  .phone { position: relative; width: 100%; max-width: 300px; }
-  .phone::before { content: ""; display: block; padding-top: 217.4%; }
-  .phone-bezel {
-    position: absolute; inset: 0; background: #111318; border-radius: 15% / 6.8%;
-    padding: 3.6% 3.2%; box-shadow: 0 20px 50px rgba(25, 31, 40, 0.22), inset 0 0 0 1.5px rgba(255, 255, 255, 0.06);
+  .phone {
+    position: relative; width: 100%; max-width: 300px;
+    filter: drop-shadow(0 20px 40px rgba(25, 31, 40, 0.22));
   }
-  .phone-bezel::before, .phone-bezel::after {
-    content: ""; position: absolute; right: -2px; width: 2px; background: #111318; border-radius: 2px 0 0 2px;
+  .phone::before { content: ""; display: block; padding-top: 204.44%; }
+  .phone-frame-img {
+    position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none;
   }
-  .phone-bezel::before { top: 16%; height: 6%; }
-  .phone-bezel::after { top: 24%; height: 10%; }
   .phone-screen {
-    position: relative; width: 100%; height: 100%; border-radius: 11% / 4.6%; overflow: hidden;
-    background: var(--white);
-  }
-  .dynamic-island {
-    position: absolute; left: 50%; top: 1.6%; transform: translateX(-50%);
-    width: 28%; height: 3%; min-height: 14px; background: #0a0a0a; border-radius: 999px; z-index: 5;
+    position: absolute; left: 5.56%; top: 2.61%; width: 88.89%; height: 94.78%;
+    border-radius: 9% / 4%; overflow: hidden; background: var(--white);
   }
   .phone-screen img {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -91,14 +84,21 @@
     width: 20px; height: 68px; pointer-events: none;
   }
   .scroll-track {
-    position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px;
-    border-radius: 2px; background: rgba(255, 96, 0, 0.18);
+    position: absolute; left: 50%; bottom: 0; width: 3px; height: 100%; margin-left: -1.5px;
+    border-radius: 2px; background: var(--primary-500);
+    transform-origin: bottom; transform: scaleY(0);
+    animation: trailGrow 1.5s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
   }
   .scroll-finger {
     position: absolute; left: 50%; top: 100%; width: 16px; height: 16px;
     margin-left: -8px; margin-top: -16px; border-radius: 999px; background: var(--primary-500);
     box-shadow: 0 2px 8px rgba(255, 96, 0, 0.45); opacity: 0;
     animation: swipeUp 1.5s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+  }
+  @keyframes trailGrow {
+    0% { transform: scaleY(0); opacity: 0.9; }
+    78% { transform: scaleY(1); opacity: 0.9; }
+    100% { transform: scaleY(1); opacity: 0; }
   }
   @keyframes swipeUp {
     0% { top: 100%; opacity: 0; }
@@ -135,6 +135,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .tap-dot, .scroll-finger { animation: none; opacity: 1; top: 40%; }
+    .scroll-track { animation: none; opacity: 0.9; transform: scaleY(0.6); }
   }
 </style>
 </head>
@@ -150,18 +151,16 @@
   <div class="guide">
     <div class="phone-col">
       <div class="phone">
-        <div class="phone-bezel">
-          <div class="phone-screen" id="phoneScreen">
-            <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
-            <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
-            <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
-            <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
-            <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
-            <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
-            <div id="tapLayer"></div>
-          </div>
-          <div class="dynamic-island"></div>
+        <div class="phone-screen" id="phoneScreen">
+          <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
+          <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
+          <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
+          <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
+          <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
+          <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
+          <div id="tapLayer"></div>
         </div>
+        <img class="phone-frame-img" src="guide-assets/iphone-frame.png" alt="" aria-hidden="true">
       </div>
       <div class="progress-dots" id="progressDots"></div>
       <div class="nav-row">
