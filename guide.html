@@ -77,14 +77,24 @@
   }
 
   .scroll-cue {
-    position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    color: var(--primary-500); pointer-events: none;
+    position: absolute; left: 50%; bottom: 16%; transform: translateX(-50%);
+    width: 20px; height: 68px; pointer-events: none;
   }
-  .scroll-cue svg { animation: scrollBounce 1.2s ease-in-out infinite; }
-  @keyframes scrollBounce {
-    0%, 100% { transform: translateY(0); opacity: 0.5; }
-    50% { transform: translateY(8px); opacity: 1; }
+  .scroll-track {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px;
+    border-radius: 2px; background: rgba(255, 96, 0, 0.18);
+  }
+  .scroll-finger {
+    position: absolute; left: 50%; top: 100%; width: 16px; height: 16px;
+    margin-left: -8px; margin-top: -16px; border-radius: 999px; background: var(--primary-500);
+    box-shadow: 0 2px 8px rgba(255, 96, 0, 0.45); opacity: 0;
+    animation: swipeUp 1.5s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+  }
+  @keyframes swipeUp {
+    0% { top: 100%; opacity: 0; }
+    12% { opacity: 1; }
+    78% { opacity: 1; }
+    100% { top: 0%; opacity: 0; }
   }
 
   .progress-dots { display: flex; gap: 6px; }
@@ -114,7 +124,7 @@
   .step-list button.active { border-color: var(--primary-500); background: #FFF6EF; color: var(--gray-900); font-weight: 600; }
 
   @media (prefers-reduced-motion: reduce) {
-    .tap-dot, .scroll-cue svg { animation: none; }
+    .tap-dot, .scroll-finger { animation: none; opacity: 1; top: 40%; }
   }
 </style>
 </head>
@@ -131,13 +141,12 @@
     <div class="phone-col">
       <div class="phone">
         <div class="phone-screen" id="phoneScreen">
-          <!-- step images: drop files into gh-pages/guide-assets/ with these exact names -->
-          <img data-step="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
-          <img data-step="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
-          <img data-step="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
-          <img data-step="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
-          <img data-step="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
-          <img data-step="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
+          <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
+          <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
+          <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
+          <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
+          <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
+          <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
           <div id="tapLayer"></div>
         </div>
       </div>
@@ -163,45 +172,59 @@
       kicker: "1단계",
       caption: "상단 탭에서 '상세'를 눌러주세요",
       detail: "대시보드 화면 위쪽 탭 중 '상세'를 누르면 이번 측정의 자세한 항목을 볼 수 있어요.",
-      tap: { xPct: 38, yPct: 17 }
+      tap: { xPct: 38, yPct: 17 },
+      img: 0
     },
     {
       kicker: "2단계",
       caption: "화면을 아래로 내려주세요",
       detail: "상세 화면 아래쪽에 '데이터 내보내기' 메뉴가 있어요. 스크롤해서 내려가주세요.",
-      scroll: true
+      scroll: true,
+      img: 1
     },
     {
       kicker: "3단계",
       caption: "'데이터 내보내기'를 눌러주세요",
       detail: "메뉴 목록에서 가장 위에 있는 '데이터 내보내기'를 눌러주세요.",
-      tap: { xPct: 50, yPct: 60 }
+      tap: { xPct: 50, yPct: 60 },
+      img: 2
     },
     {
       kicker: "4단계",
-      caption: "기본으로 '기간'이 선택되어 있어요",
-      detail: "이 상태로 내보내면 지정된 기간의 기록만 받아져요. 대시보드에서 전체 추이를 보려면 처음 측정부터 지금까지 전체 기록이 필요해요. '전체'를 눌러주세요.",
-      tap: { xPct: 26, yPct: 35 }
-    },
-    {
-      kicker: "4단계",
-      caption: "'전체'가 선택됐어요",
-      detail: "이제 처음 측정부터 지금까지 모든 기록이 포함돼요. 이 상태로 다음 단계로 넘어가세요.",
+      caption: "'기간'과 '전체' 중 원하는 범위를 선택하세요",
+      detail: "특정 기간만 받고 싶으면 '기간'을, 처음부터 지금까지 전체 기록을 받고 싶으면 '전체'를 눌러주세요. 기본값은 '기간'이에요.",
+      tap: { xPct: 26, yPct: 35 },
+      img: 3
     },
     {
       kicker: "5단계",
-      caption: "아래로 스크롤한 다음 '내보내기'를 눌러주세요",
-      detail: "화면 아래로 내리면 '내보내기' 버튼이 보여요. 눌러서 CSV 파일을 받으세요. 받은 파일을 대시보드 업로드 버튼으로 올리면 끝이에요.",
+      caption: "여기서는 '전체'를 선택했어요",
+      detail: "'전체'를 선택하면 처음 측정부터 지금까지 모든 기록이 포함돼요. 대시보드에서 전체 추이를 보고 싶다면 이 옵션이 편해요.",
+      img: 4
+    },
+    {
+      kicker: "6단계",
+      caption: "화면을 아래로 내려주세요",
+      detail: "조금 더 내리면 '내보내기' 버튼이 보여요.",
       scroll: true,
-      tap: { xPct: 50, yPct: 93 }
+      img: 4
+    },
+    {
+      kicker: "7단계",
+      caption: "'내보내기'를 눌러주세요",
+      detail: "버튼을 누르면 CSV 파일을 받을 수 있어요. 받은 파일을 대시보드 업로드 버튼으로 올리면 끝이에요.",
+      tap: { xPct: 50, yPct: 93 },
+      img: 5
     }
   ];
 
   var current = 0;
 
   function render() {
+    var step = STEPS[current];
     document.querySelectorAll(".phone-screen img").forEach(function (img) {
-      var isActive = parseInt(img.dataset.step, 10) === current;
+      var imgIndex = parseInt(img.dataset.img, 10);
+      var isActive = imgIndex === step.img;
       img.classList.toggle("active", isActive);
       img.onerror = function () {
         var existing = img.nextElementSibling;
@@ -211,16 +234,15 @@
         }
         var ph = document.createElement("div");
         ph.className = "placeholder" + (isActive ? " active" : "");
-        ph.dataset.step = img.dataset.step;
+        ph.dataset.img = img.dataset.img;
         ph.textContent = img.getAttribute("src") + " 이미지를 추가해주세요";
         img.insertAdjacentElement("afterend", ph);
       };
     });
     document.querySelectorAll(".placeholder").forEach(function (ph) {
-      ph.classList.toggle("active", parseInt(ph.dataset.step, 10) === current);
+      ph.classList.toggle("active", parseInt(ph.dataset.img, 10) === step.img);
     });
 
-    var step = STEPS[current];
     var tapLayer = document.getElementById("tapLayer");
     tapLayer.innerHTML = "";
     if (step.tap) {
@@ -233,7 +255,7 @@
     if (step.scroll) {
       var cue = document.createElement("div");
       cue.className = "scroll-cue";
-      cue.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      cue.innerHTML = '<div class="scroll-track"></div><div class="scroll-finger"></div>';
       tapLayer.appendChild(cue);
     }
 
