@@ -38,15 +38,25 @@
     .guide { grid-template-columns: 1fr; }
   }
 
-  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-  .phone {
-    position: relative; width: 100%; max-width: 320px; aspect-ratio: 9 / 19.5;
-    background: var(--gray-900); border-radius: 34px; padding: 10px;
-    box-shadow: 0 20px 50px rgba(25, 31, 40, 0.18);
+  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+  .phone { position: relative; width: 100%; max-width: 300px; }
+  .phone::before { content: ""; display: block; padding-top: 217.4%; }
+  .phone-bezel {
+    position: absolute; inset: 0; background: #111318; border-radius: 15% / 6.8%;
+    padding: 3.6% 3.2%; box-shadow: 0 20px 50px rgba(25, 31, 40, 0.22), inset 0 0 0 1.5px rgba(255, 255, 255, 0.06);
   }
+  .phone-bezel::before, .phone-bezel::after {
+    content: ""; position: absolute; right: -2px; width: 2px; background: #111318; border-radius: 2px 0 0 2px;
+  }
+  .phone-bezel::before { top: 16%; height: 6%; }
+  .phone-bezel::after { top: 24%; height: 10%; }
   .phone-screen {
-    position: relative; width: 100%; height: 100%; border-radius: 24px; overflow: hidden;
+    position: relative; width: 100%; height: 100%; border-radius: 11% / 4.6%; overflow: hidden;
     background: var(--white);
+  }
+  .dynamic-island {
+    position: absolute; left: 50%; top: 1.6%; transform: translateX(-50%);
+    width: 28%; height: 3%; min-height: 14px; background: #0a0a0a; border-radius: 999px; z-index: 5;
   }
   .phone-screen img {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -140,14 +150,17 @@
   <div class="guide">
     <div class="phone-col">
       <div class="phone">
-        <div class="phone-screen" id="phoneScreen">
-          <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
-          <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
-          <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
-          <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
-          <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
-          <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
-          <div id="tapLayer"></div>
+        <div class="phone-bezel">
+          <div class="phone-screen" id="phoneScreen">
+            <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
+            <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
+            <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
+            <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
+            <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
+            <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
+            <div id="tapLayer"></div>
+          </div>
+          <div class="dynamic-island"></div>
         </div>
       </div>
       <div class="progress-dots" id="progressDots"></div>
