@@ -33,10 +33,10 @@
   h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--gray-900); }
   .lead { margin: 0 0 28px; font-size: 14px; color: var(--gray-600); line-height: 1.6; }
 
-  .step-header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .step-header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; min-height: 144px; }
   .step-kicker { font-size: 12px; font-weight: 700; color: var(--primary-500); }
-  .step-caption { font-size: 18px; font-weight: 700; color: var(--gray-900); line-height: 1.4; min-height: 2.8em; }
-  .step-detail { font-size: 13px; color: var(--gray-600); line-height: 1.65; min-height: 4.95em; }
+  .step-caption { font-size: 18px; font-weight: 700; color: var(--gray-900); line-height: 1.4; }
+  .step-detail { font-size: 13px; color: var(--gray-600); line-height: 1.65; }
 
   .phone-stage { display: flex; align-items: center; justify-content: center; gap: 16px; }
   .arrow-btn {
@@ -44,8 +44,11 @@
     border: 1px solid var(--border-normal); background: var(--white); color: var(--gray-700);
     display: flex; align-items: center; justify-content: center;
     transition: border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
-  .arrow-btn:hover:not(:disabled) { border-color: var(--primary-500); color: var(--primary-500); }
+  @media (hover: hover) {
+    .arrow-btn:hover:not(:disabled) { border-color: var(--primary-500); color: var(--primary-500); }
+  }
   .arrow-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .arrow-btn svg { width: 18px; height: 18px; }
 
@@ -286,9 +289,11 @@
 
   document.getElementById("prevBtn").addEventListener("click", function () {
     if (current > 0) { current -= 1; render(); }
+    this.blur();
   });
   document.getElementById("nextBtn").addEventListener("click", function () {
     if (current < STEPS.length - 1) { current += 1; render(); }
+    this.blur();
   });
 
   render();
