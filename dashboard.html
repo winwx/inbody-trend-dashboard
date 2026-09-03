@@ -46,6 +46,8 @@
 <body>
 <div id="app" style="width:100%; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding: 32px 20px 64px;"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -166,71 +168,100 @@
   }
 
   function buildChart(selectedDefs, records) {
-    var leftPad = 24, rightPad = 24, topPad = 34, bottomPad = 56;
-    var chartW = 800, chartH = 300;
-    var w = chartW - leftPad - rightPad, h = chartH - topPad - bottomPad;
-
     var dates = [];
     records.forEach(function (r) { if (dates.indexOf(r.date) === -1) dates.push(r.date); });
-    var dateIndex = {};
-    dates.forEach(function (d, i) { dateIndex[d] = i; });
-    var xFor = function (d) {
-      if (dates.length <= 1) return leftPad + w / 2;
-      return leftPad + (dateIndex[d] / (dates.length - 1)) * w;
-    };
 
     var isEmpty = selectedDefs.length === 0;
-    var series = [];
     var legend = [];
-    selectedDefs.forEach(function (def, sIdx) {
+    var datasets = [];
+    selectedDefs.forEach(function (def) {
       var pts = records.filter(function (r) { return r[def.key] !== null; });
       var latestText = pts.length > 0 ? fmtVal(def, pts[pts.length - 1][def.key]) : "—";
       legend.push({ key: def.key, label: def.label, color: def.color, latestText: latestText });
-      if (pts.length < 2) { series.push({ key: def.key, color: def.color, pathD: "", points: [] }); return; }
-      var values = pts.map(function (p) { return p[def.key]; });
-      var min = Math.min.apply(null, values);
-      var max = Math.max.apply(null, values);
-      if (min === max) { min = min - 1; max = max + 1; }
-      var above = sIdx % 2 === 0;
-      var points = pts.map(function (p, i) {
-        var x = Math.round(xFor(p.date) * 10) / 10;
-        var y = Math.round((topPad + (1 - (p[def.key] - min) / (max - min)) * h) * 10) / 10;
-        var isLast = i === pts.length - 1;
-        return {
-          cx: x, cy: y, r: isLast ? 5 : 3,
-          leftPct: Math.round((x / chartW) * 1000) / 10,
-          topPct: Math.round((y / chartH) * 1000) / 10,
-          labelTransform: above ? "translate(-50%, -140%)" : "translate(-50%, 40%)",
-          valueText: p[def.key].toFixed(def.decimals) + def.unit,
-          tooltip: fmtDateLabel(p.date) + " · " + def.label + " " + p[def.key].toFixed(def.decimals) + def.unit
-        };
+      var byDate = {};
+      pts.forEach(function (p) { byDate[p.date] = p[def.key]; });
+      var data = dates.map(function (d) { return Object.prototype.hasOwnProperty.call(byDate, d) ? byDate[d] : null; });
+      datasets.push({
+        key: def.key, label: def.label, unit: def.unit, decimals: def.decimals,
+        color: def.color, data: data, pointCount: pts.length
       });
-      var pathD = "M" + points.map(function (p) { return p.cx + "," + p.cy; }).join(" L ");
-      series.push({ key: def.key, color: def.color, pathD: pathD, points: points });
     });
 
-    var dateLabels = dates.map(function (d) {
-      var x = Math.round(xFor(d) * 10) / 10;
-      var y = chartH - bottomPad + 16;
-      return {
-        leftPct: Math.round((x / chartW) * 1000) / 10,
-        topPct: Math.round((y / chartH) * 1000) / 10,
-        text: fmtDateLabel(d)
-      };
-    });
-
-    var baselineY = chartH - bottomPad;
+    var anyHasLine = datasets.some(function (ds) { return ds.pointCount >= 2; });
+    var hasEnough = !isEmpty && anyHasLine;
+    var notEnough = !isEmpty && !anyHasLine;
     var rangeText = dates.length > 0 ? (fmtDateLabel(dates[0]) + " ~ " + fmtDateLabel(dates[dates.length - 1])) : "데이터 없음";
-    var anySeriesHasLine = series.some(function (s) { return s.points.length >= 2; });
-    var hasEnough = !isEmpty && anySeriesHasLine;
-    var notEnough = !isEmpty && !anySeriesHasLine;
-    var minWidthPx = Math.max(640, dates.length * 70 + 80);
+    var labels = dates.map(fmtDateLabel);
 
     return {
       isEmpty: isEmpty, hasEnough: hasEnough, notEnough: notEnough,
-      rangeText: rangeText, legend: legend, series: series, dateLabels: dateLabels, baselineY: baselineY,
-      minWidthPx: minWidthPx
+      rangeText: rangeText, legend: legend, labels: labels, datasets: datasets
     };
+  }
+
+  var chartInstance = null;
+
+  function updateChartCanvas(chart) {
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    if (!chart.hasEnough) return;
+    var canvas = document.getElementById("trendChart");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    var scalesConfig = {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 10 }, color: "#8A95A0", maxRotation: 60, minRotation: 0, autoSkip: true }
+      }
+    };
+    var chartDatasets = chart.datasets.map(function (ds, idx) {
+      scalesConfig["y" + idx] = chart.datasets.length === 1
+        ? { display: true, grid: { color: "#E5E7EA" }, ticks: { font: { size: 10 }, color: "#8A95A0" } }
+        : { display: false, grid: { display: false } };
+      return {
+        label: ds.label,
+        data: ds.data,
+        borderColor: ds.color,
+        backgroundColor: ds.color,
+        pointBackgroundColor: ds.color,
+        pointBorderColor: "#fff",
+        pointBorderWidth: 1.5,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        borderWidth: 2.5,
+        spanGaps: true,
+        tension: 0.15,
+        yAxisID: "y" + idx
+      };
+    });
+
+    chartInstance = new Chart(canvas.getContext("2d"), {
+      type: "line",
+      data: { labels: chart.labels, datasets: chartDatasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: scalesConfig,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                var ds = chart.datasets[ctx.datasetIndex];
+                var v = ctx.parsed.y;
+                return ds.label + ": " + (v === null || v === undefined ? "—" : v.toFixed(ds.decimals) + ds.unit);
+              }
+            }
+          },
+          zoom: {
+            pan: { enabled: true, mode: "x" },
+            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" }
+          }
+        }
+      }
+    });
+
+    canvas.ondblclick = function () { if (chartInstance) chartInstance.resetZoom(); };
   }
 
   function chipStyle(active, color) {
@@ -311,33 +342,13 @@
           '<span style="color:var(--gray-500);">' + item.latestText + '</span></div>';
       }).join("");
 
-      var pathsHtml = chart.series.map(function (s) {
-        var circles = s.points.map(function (p) {
-          return '<circle cx="' + p.cx + '" cy="' + p.cy + '" r="' + p.r + '" fill="' + s.color + '" stroke="var(--white)" stroke-width="1.5"><title>' + escapeHtml(p.tooltip) + '</title></circle>';
-        }).join("");
-        return '<path d="' + s.pathD + '" fill="none" stroke="' + s.color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' + circles;
-      }).join("");
-
-      var valueLabelsHtml = chart.series.map(function (s) {
-        return s.points.map(function (p) {
-          return '<div style="position:absolute; left:' + p.leftPct + '%; top:' + p.topPct + '%; transform:' + p.labelTransform + '; font-size:11px; font-weight:700; color:' + s.color + '; white-space:nowrap;">' + p.valueText + '</div>';
-        }).join("");
-      }).join("");
-
-      var dateLabelsHtml = chart.dateLabels.map(function (d) {
-        return '<div style="position:absolute; left:' + d.leftPct + '%; top:' + d.topPct + '%; transform:translate(-100%, -50%) rotate(-40deg); transform-origin:right center; font-size:10px; color:var(--gray-500); white-space:nowrap;">' + d.text + '</div>';
-      }).join("");
-
       chartHtml =
+        '<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">' +
         '<div style="display:flex; flex-wrap:wrap; gap:16px;">' + legendHtml + '</div>' +
-        '<div style="font-size:11px; color:var(--gray-400);">데이터가 많으면 그래프를 좌우로 스크롤해서 볼 수 있어요</div>' +
-        '<div style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;">' +
-        '<div style="position:relative; width:max(100%, ' + chart.minWidthPx + 'px); height:300px;">' +
-        '<svg viewBox="0 0 800 300" preserveAspectRatio="none" style="width:100%; height:300px; display:block;">' +
-        '<line x1="24" y1="' + chart.baselineY + '" x2="776" y2="' + chart.baselineY + '" stroke="var(--gray-200)" stroke-width="1"/>' +
-        pathsHtml + '</svg>' +
-        '<div style="position:absolute; inset:0; pointer-events:none;">' + valueLabelsHtml + dateLabelsHtml + '</div>' +
-        '</div></div>';
+        '<button data-action="resetzoom" style="background:var(--white); color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600;">줌 초기화</button>' +
+        '</div>' +
+        '<div style="font-size:11px; color:var(--gray-400);">손가락으로 오므리거나 펼쳐서 확대·축소, 드래그로 이동할 수 있어요</div>' +
+        '<div style="position:relative; width:100%; height:320px;"><canvas id="trendChart"></canvas></div>';
     } else if (chart.notEnough) {
       chartHtml = '<div style="height:120px; display:flex; align-items:center; justify-content:center; color:var(--gray-500); font-size:13px; background:var(--bg-normal); border-radius:12px;">추세를 보려면 측정 기록이 2건 이상 필요해요</div>';
     } else if (chart.isEmpty) {
@@ -431,6 +442,7 @@
       '</div>';
 
     wireEvents();
+    updateChartCanvas(chart);
   }
 
   function pickDatePreset(monthsStr, referenceRecords) {
@@ -462,6 +474,8 @@
         var deviceFilter = state.deviceFilter || "all";
         var byDevice = deviceFilter === "all" ? state.records : state.records.filter(function (r) { return r.device === deviceFilter; });
         pickDatePreset(value, byDevice);
+      } else if (action === "resetzoom") {
+        if (chartInstance) chartInstance.resetZoom();
       }
     };
     var fileInput = document.getElementById("csvFile");
