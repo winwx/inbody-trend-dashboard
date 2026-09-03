@@ -66,13 +66,6 @@
     { key: "score", label: "인바디점수", unit: "점", good: "up", decimals: 0, color: "oklch(0.55 0.17 290)" }
   ];
 
-  var SAMPLE_CSV = "날짜,측정장비,체중(kg),골격근량(kg),근육량(kg),체지방량(kg),BMI(kg/m²),체지방률(%),기초대사량(kcal),인바디점수\n" +
-    "20260901180317,H20N,74.5,33.6,-,15.7,24.1,21.1,1640,76\n" +
-    "20260731175827,H20N,73.9,33.0,-,15.9,23.9,21.5,1623,74\n" +
-    "20260604175853,570,73.3,34.8,-,12.6,23.3,17.2,1681,80\n" +
-    "20260116180952,H20N,72.6,32.8,-,15.0,23.4,20.6,1614,75\n" +
-    "20260116180836,H20N,72.4,32.1,-,15.9,23.4,21.9,1590,73";
-
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -138,10 +131,8 @@
     return { records: records };
   }
 
-  var DEFAULT_RECORDS = parseCSV(SAMPLE_CSV).records;
-
   var state = {
-    records: DEFAULT_RECORDS, selectedMetrics: ["weight"], deviceFilter: "all",
+    records: [], selectedMetrics: ["weight"], deviceFilter: "all",
     dateFrom: "", dateTo: "", datePreset: null, error: null, fileName: null
   };
 
@@ -371,8 +362,46 @@
         '</tr>';
     }).join("");
 
-    var fileStatusText = state.fileName ? ("업로드됨: " + escapeHtml(state.fileName)) : "기본 데이터 5건 표시 중 (CSV 업로드로 교체)";
+    var fileStatusText = state.fileName ? ("업로드됨: " + escapeHtml(state.fileName)) : "업로드된 CSV가 없어요";
     var errorHtml = state.error ? '<div style="font-size:12px; color:var(--danger);">' + escapeHtml(state.error) + '</div>' : '';
+
+    var bodyHtml;
+    if (allRecords.length === 0) {
+      bodyHtml =
+        '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:64px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">' +
+        '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:var(--gray-400);"><path d="M12 15V4m0 0L8 8m4-4l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
+        '<div style="font-size:16px; font-weight:700; color:var(--gray-900);">아직 업로드된 데이터가 없어요</div>' +
+        '<div style="font-size:14px; color:var(--gray-600); max-width:360px; line-height:1.6;">인바디에서 내보낸 CSV 파일을 위 업로드 버튼으로 올리면 여기서 바로 추세를 확인할 수 있어요.</div>' +
+        '<a href="guide.html" style="margin-top:4px; font-size:13px; font-weight:600; color:var(--primary-500);">CSV는 어떻게 받나요? →</a>' +
+        '</div>';
+    } else {
+      bodyHtml =
+        '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">' +
+        '<span style="font-size:13px; color:var(--gray-600); font-weight:500;">측정장비</span>' + deviceChipsHtml +
+        '</div>' +
+        '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">' +
+        '<span style="font-size:13px; color:var(--gray-600); font-weight:500;">기간</span>' + dateChipsHtml +
+        '<div style="display:flex; align-items:center; gap:6px; margin-left:2px;">' +
+        '<input id="dateFromInput" type="date" value="' + dateFrom + '" style="min-width:132px; padding:6px 8px; font-size:12px; color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; font-family:var(--font-main);" />' +
+        '<span style="font-size:12px; color:var(--gray-500);">~</span>' +
+        '<input id="dateToInput" type="date" value="' + dateTo + '" style="min-width:132px; padding:6px 8px; font-size:12px; color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; font-family:var(--font-main);" />' +
+        '</div></div>' +
+        '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">' + kpiHtml + '</div>' +
+        '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">' +
+        '<div style="display:flex; flex-wrap:wrap; gap:8px;">' + metricChipsHtml + '</div>' +
+        '<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">' +
+        '<div style="font-size:16px; font-weight:600; color:var(--gray-900);">지표 비교 추이</div>' +
+        '<div style="font-size:12px; color:var(--gray-500);">' + chart.rangeText + '</div></div>' +
+        chartHtml +
+        '</div>' +
+        '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:16px;">' +
+        '<div style="display:flex; align-items:center; justify-content:space-between;">' +
+        '<div style="font-size:16px; font-weight:600; color:var(--gray-900);">측정 이력</div>' +
+        '<div style="font-size:12px; color:var(--gray-500);">' + records.length + '건의 측정 기록</div></div>' +
+        '<div style="max-height:340px; overflow:auto; border:1px solid var(--border-weak); border-radius:12px;">' +
+        '<table><thead><tr><th>측정일시</th><th>장비</th><th>체중</th><th>골격근량</th><th>체지방량</th><th>체지방률</th><th>BMI</th><th>인바디점수</th></tr></thead>' +
+        '<tbody>' + tableRowsHtml + '</tbody></table></div></div>';
+    }
 
     document.getElementById("app").innerHTML =
       '<div style="width:100%; max-width:1100px; display:flex; flex-direction:column; gap:24px;">' +
@@ -385,35 +414,11 @@
       '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:20px 24px; display:flex; flex-wrap:wrap; align-items:center; gap:16px; justify-content:space-between;">' +
       '<div style="display:flex; flex-direction:column; gap:6px;">' +
       '<input id="csvFile" type="file" accept=".csv" />' +
-      '<div style="font-size:12px; color:var(--gray-500);">' + fileStatusText + '</div>' + errorHtml +
+      '<div style="font-size:12px; color:var(--gray-500);">' + fileStatusText + ' · <a href="guide.html" style="color:var(--primary-500); font-weight:600;">CSV는 어떻게 받나요?</a></div>' + errorHtml +
       '</div>' +
-      '<button data-action="reset" style="background:var(--white); color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; padding:10px 16px; font-size:13px; font-weight:600;">기본 데이터로 초기화</button>' +
+      '<button data-action="reset" style="background:var(--white); color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; padding:10px 16px; font-size:13px; font-weight:600;">데이터 지우기</button>' +
       '</div>' +
-      '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">' +
-      '<span style="font-size:13px; color:var(--gray-600); font-weight:500;">측정장비</span>' + deviceChipsHtml +
-      '</div>' +
-      '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">' +
-      '<span style="font-size:13px; color:var(--gray-600); font-weight:500;">기간</span>' + dateChipsHtml +
-      '<div style="display:flex; align-items:center; gap:6px; margin-left:2px;">' +
-      '<input id="dateFromInput" type="date" value="' + dateFrom + '" style="min-width:132px; padding:6px 8px; font-size:12px; color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; font-family:var(--font-main);" />' +
-      '<span style="font-size:12px; color:var(--gray-500);">~</span>' +
-      '<input id="dateToInput" type="date" value="' + dateTo + '" style="min-width:132px; padding:6px 8px; font-size:12px; color:var(--gray-700); border:1px solid var(--border-normal); border-radius:8px; font-family:var(--font-main);" />' +
-      '</div></div>' +
-      '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">' + kpiHtml + '</div>' +
-      '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">' +
-      '<div style="display:flex; flex-wrap:wrap; gap:8px;">' + metricChipsHtml + '</div>' +
-      '<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">' +
-      '<div style="font-size:16px; font-weight:600; color:var(--gray-900);">지표 비교 추이</div>' +
-      '<div style="font-size:12px; color:var(--gray-500);">' + chart.rangeText + '</div></div>' +
-      chartHtml +
-      '</div>' +
-      '<div style="background:var(--white); border:1px solid var(--border-weak); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:16px;">' +
-      '<div style="display:flex; align-items:center; justify-content:space-between;">' +
-      '<div style="font-size:16px; font-weight:600; color:var(--gray-900);">측정 이력</div>' +
-      '<div style="font-size:12px; color:var(--gray-500);">' + records.length + '건의 측정 기록</div></div>' +
-      '<div style="max-height:340px; overflow:auto; border:1px solid var(--border-weak); border-radius:12px;">' +
-      '<table><thead><tr><th>측정일시</th><th>장비</th><th>체중</th><th>골격근량</th><th>체지방량</th><th>체지방률</th><th>BMI</th><th>인바디점수</th></tr></thead>' +
-      '<tbody>' + tableRowsHtml + '</tbody></table></div></div>' +
+      bodyHtml +
       '</div>';
 
     wireEvents();
@@ -443,7 +448,7 @@
         if (i !== -1) cur.splice(i, 1); else cur.push(value);
         setState({ selectedMetrics: cur });
       } else if (action === "reset") {
-        setState({ records: DEFAULT_RECORDS, error: null, fileName: null, deviceFilter: "all", dateFrom: "", dateTo: "", datePreset: null });
+        setState({ records: [], error: null, fileName: null, deviceFilter: "all", dateFrom: "", dateTo: "", datePreset: null });
       } else if (action === "preset") {
         var deviceFilter = state.deviceFilter || "all";
         var byDevice = deviceFilter === "all" ? state.records : state.records.filter(function (r) { return r.device === deviceFilter; });
