@@ -28,19 +28,29 @@
   a { color: var(--primary-500); text-decoration: none; }
   button { font-family: var(--font-main); cursor: pointer; }
 
-  .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 64px; }
   .back { font-size: 13px; color: var(--gray-600); display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; }
-  h1 { margin: 0 0 6px; font-size: 28px; font-weight: 700; letter-spacing: -0.3px; color: var(--gray-900); }
-  .lead { margin: 0 0 28px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--gray-900); }
+  .lead { margin: 0 0 28px; font-size: 14px; color: var(--gray-600); line-height: 1.6; }
 
-  .guide { display: grid; grid-template-columns: 340px 1fr; gap: 40px; align-items: start; }
-  @media (max-width: 760px) {
-    .guide { grid-template-columns: 1fr; }
+  .step-header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .step-kicker { font-size: 12px; font-weight: 700; color: var(--primary-500); }
+  .step-caption { font-size: 18px; font-weight: 700; color: var(--gray-900); line-height: 1.4; }
+  .step-detail { font-size: 13px; color: var(--gray-600); line-height: 1.65; }
+
+  .phone-stage { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .arrow-btn {
+    flex: none; width: 40px; height: 40px; border-radius: 999px;
+    border: 1px solid var(--border-normal); background: var(--white); color: var(--gray-700);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   }
+  .arrow-btn:hover:not(:disabled) { border-color: var(--primary-500); color: var(--primary-500); }
+  .arrow-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .arrow-btn svg { width: 18px; height: 18px; }
 
-  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
   .phone {
-    position: relative; width: 100%; max-width: 300px;
+    position: relative; width: 100%; max-width: 280px; flex: 1 1 auto;
     filter: drop-shadow(0 20px 40px rgba(25, 31, 40, 0.22));
   }
   .phone::before { content: ""; display: block; padding-top: 204.44%; }
@@ -62,6 +72,12 @@
     background: var(--gray-100); opacity: 0; transition: opacity 0.35s ease;
   }
   .phone-screen .placeholder.active { opacity: 1; }
+
+  @media (max-width: 480px) {
+    .phone { max-width: 210px; }
+    .arrow-btn { width: 32px; height: 32px; }
+    .phone-stage { gap: 8px; }
+  }
 
   .tap-dot {
     position: absolute; width: 30px; height: 30px; border-radius: 999px;
@@ -107,31 +123,11 @@
     100% { top: 0%; opacity: 0; }
   }
 
-  .progress-dots { display: flex; gap: 6px; }
+  .progress-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
   .progress-dots span {
     width: 7px; height: 7px; border-radius: 999px; background: var(--gray-300);
   }
   .progress-dots span.active { background: var(--primary-500); }
-
-  .nav-row { display: flex; align-items: center; gap: 10px; }
-  .nav-btn {
-    border: 1px solid var(--border-normal); background: var(--white); color: var(--gray-700);
-    font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 8px;
-  }
-  .nav-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
-  .nav-btn.primary { background: var(--primary-500); color: #fff; border-color: var(--primary-500); }
-  .nav-btn.primary:hover { background: var(--primary-600); }
-
-  .step-panel { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
-  .step-kicker { font-size: 13px; font-weight: 700; color: var(--primary-500); }
-  .step-caption { font-size: 20px; font-weight: 700; color: var(--gray-900); line-height: 1.4; }
-  .step-detail { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
-  .step-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-  .step-list button {
-    text-align: left; border: 1px solid var(--border-weak); background: var(--white);
-    border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--gray-700);
-  }
-  .step-list button.active { border-color: var(--primary-500); background: #FFF6EF; color: var(--gray-900); font-weight: 600; }
 
   @media (prefers-reduced-motion: reduce) {
     .tap-dot, .scroll-finger { animation: none; opacity: 1; top: 40%; }
@@ -148,34 +144,36 @@
   <h1>CSV는 어떻게 받나요</h1>
   <p class="lead">인바디 앱에서 전체 측정 기록을 CSV로 내보내는 방법을 순서대로 따라해보세요.</p>
 
-  <div class="guide">
-    <div class="phone-col">
-      <div class="phone">
-        <div class="phone-screen" id="phoneScreen">
-          <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
-          <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
-          <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
-          <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
-          <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
-          <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
-          <div id="tapLayer"></div>
-        </div>
-        <img class="phone-frame-img" src="guide-assets/iphone-frame.png" alt="" aria-hidden="true">
+  <div class="step-header">
+    <div class="step-kicker" id="stepKicker"></div>
+    <div class="step-caption" id="stepCaption"></div>
+    <div class="step-detail" id="stepDetail"></div>
+  </div>
+
+  <div class="phone-stage">
+    <button class="arrow-btn" id="prevBtn" aria-label="이전 단계">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="phone">
+      <div class="phone-screen" id="phoneScreen">
+        <img data-img="0" src="guide-assets/inbody_1.PNG" alt="대시보드 화면">
+        <img data-img="1" src="guide-assets/inbody_2.PNG" alt="상세 탭 화면">
+        <img data-img="2" src="guide-assets/inbody_3.PNG" alt="데이터 내보내기 메뉴">
+        <img data-img="3" src="guide-assets/inbody_4.PNG" alt="기간 선택 화면">
+        <img data-img="4" src="guide-assets/inbody_5.PNG" alt="전체 선택 화면">
+        <img data-img="5" src="guide-assets/inbody_6.PNG" alt="내보내기 화면">
+        <div id="tapLayer"></div>
       </div>
-      <div class="progress-dots" id="progressDots"></div>
-      <div class="nav-row">
-        <button class="nav-btn" id="prevBtn">이전</button>
-        <button class="nav-btn primary" id="nextBtn">다음</button>
-      </div>
+      <img class="phone-frame-img" src="guide-assets/iphone-frame.png" alt="" aria-hidden="true">
     </div>
 
-    <div class="step-panel">
-      <div class="step-kicker" id="stepKicker"></div>
-      <div class="step-caption" id="stepCaption"></div>
-      <div class="step-detail" id="stepDetail"></div>
-      <div class="step-list" id="stepList"></div>
-    </div>
+    <button class="arrow-btn" id="nextBtn" aria-label="다음 단계">
+      <svg id="nextIcon" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
   </div>
+
+  <div class="progress-dots" id="progressDots"></div>
 </div>
 
 <script>
@@ -280,13 +278,12 @@
       return '<span class="' + (i === current ? "active" : "") + '"></span>';
     }).join("");
 
-    var listEl = document.getElementById("stepList");
-    listEl.innerHTML = STEPS.map(function (s, i) {
-      return '<button data-goto="' + i + '" class="' + (i === current ? "active" : "") + '">' + (i + 1) + ". " + s.caption + "</button>";
-    }).join("");
-
     document.getElementById("prevBtn").disabled = current === 0;
-    document.getElementById("nextBtn").textContent = current === STEPS.length - 1 ? "완료" : "다음";
+    var isLast = current === STEPS.length - 1;
+    document.getElementById("nextBtn").setAttribute("aria-label", isLast ? "완료, 대시보드로 이동" : "다음 단계");
+    document.getElementById("nextIcon").innerHTML = isLast
+      ? '<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+      : '<path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
   }
 
   document.getElementById("prevBtn").addEventListener("click", function () {
@@ -295,12 +292,6 @@
   document.getElementById("nextBtn").addEventListener("click", function () {
     if (current < STEPS.length - 1) { current += 1; render(); }
     else { window.location.href = "dashboard.html"; }
-  });
-  document.getElementById("stepList").addEventListener("click", function (e) {
-    var btn = e.target.closest("button[data-goto]");
-    if (!btn) return;
-    current = parseInt(btn.dataset.goto, 10);
-    render();
   });
 
   render();
